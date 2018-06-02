@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<style>
+
+/* Menu.css file */    
+/* Add a black background color to the top navigation */
+.topnav {
+    background-color: #333;
+    overflow: hidden;
+    
+}
+/* Style the links inside the navigation bar */
+.topnav a {
+    float: left;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 10px 12px;
+    text-decoration: none;
+    font-size: 12px;
+    font-family: Monaco, Menlo, Consolas, "Courier New", monospace;
+  
+}
+
+/* Change the color of links on hover */
+.topnav a:hover {
+    background-color: #ddd;
+    color: black;
+}
+
+/* Add a color to the active/current link */
+.topnav a.active {
+    background-color: steelblue;
+    color: white;
+}
+/* Menu.css file */    
+    
+h1,h2,h3,h4,h5,h6 {
+     font-family: Monaco, Menlo, Consolas, "Courier New", monospace;
+     letter-spacing: 1px;
+}
+body {  font-family: Monaco, Menlo, Consolas, "Courier New", monospace;
+        font: 13px Arial;}    
+div {
+     font: 13px monospace;
+}   
+  
+div.intro {
+     font: 12px "Courier New";
+}   
+ 
+    
+    
+.arc text {
+  font: 12px Menlo;
+  text-anchor: middle;
+}
+
+.arc path {
+  stroke: #fff;
+}
+
+</style>
+
+<head>
+
+    
+</head>
+<div class="topnav">
+  <a href="Home.html">Home</a>
+  <a  href="recalls-years.html">Recalls By Year</a>
+  <a  href="recalls-producttype.html">Recalls By Product Type</a>
+  <a  href="recalls-usmap.html">Recalls By Recalling Firms</a>
+  <a  class="active" href="recalls-status.html">Ongoing Recalls by Prouect Type</a>
+</div>
+<body>    
+
+    <h2 align="center">Ongoing Recalls Analysis by Product Type</h2> 
+
+<svg width="1200" height="400"></svg>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+
+var svg = d3.select("svg"),
+    width = +svg.attr("width"),
+    height = +svg.attr("height"),
+    radius = Math.min(width, height) / 2,
+    g = svg.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+var color = d3.scaleOrdinal(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+
+var pie = d3.pie()
+    .sort(null)
+    .value(function(d) { return d.population; });
+
+var path = d3.arc()
+    .outerRadius(radius - 10)
+    .innerRadius(0);
+
+var label = d3.arc()
+    .outerRadius(radius - 40)
+    .innerRadius(radius - 40);
+
+d3.csv("recalls-ongoing.csv", function(d) {
+  d.population = +d.population;
+  return d;
+}, function(error, data) {
+  if (error) throw error;
+
+  var arc = g.selectAll(".arc")
+    .data(pie(data))
+    .enter().append("g")
+      .attr("class", "arc");
+
+  arc.append("path")
+      .attr("d", path)
+      .attr("fill", function(d) { return color(d.data.age); });
+
+  arc.append("text")
+      .attr("transform", function(d) { return "translate(" + label.centroid(d) + ")"; })
+      .attr("dy", "0.35em")
+      .text(function(d) { return d.data.age + ': ' + d.data.population ; });
+});
+
+</script>
+<div class="intro"> 
+    <b>&middot; Ongoing Status:</b> The status indicates that the recalls have not completed. FDA continues to monitor ongoing recalls. 
+</div>    
+<br>    
+<div>
+This is for the ongoing status, which is neither completed nor terminated, recalls analysis by the product type. The data is between 2012 and 2017. The graph shows that "Devices" is the highest number of ongoing recalls status. "Devices" are most likely medical devices in recalls and almost half number of total ongoing status recalls. We need to analyze deeply why many "Devices" are ongoing recalls rather than other product types. And "Food/Cosmetics" and "Drug" are the almost similar number of recalls. 
+</div>
+</body>
+</html>

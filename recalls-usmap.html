@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<link href="menu.css" rel="stylesheet">
+    
+<style type="text/css">
+
+h1,h2,h3,h4,h5,h6 {
+     font-family: Monaco, Menlo, Consolas, "Courier New", monospace;
+     letter-spacing: 1px;
+}
+div {
+     font: 13px monospace;
+}   
+  
+div.intro {
+     font: 12px "Courier New";
+}   
+  
+    
+body {  font-family: Monaco, Menlo, Consolas, "Courier New", monospace;
+        font: 13px Arial;}
+
+path { 
+	stroke: steelblue;
+	stroke-width: 2;
+	fill: none;
+}
+    
+/* Legend Position Style */
+.legend {
+	position:absolute;
+	left:20px;
+	top:30px;
+}
+
+.axis text {
+	font: 10px sans-serif;
+}
+
+.axis line, .axis path {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+.bar {
+  fill: steelblue;
+}
+
+.bar:hover {
+  fill: brown;
+}
+
+.axis--x path {
+  display: none;
+}
+   
+.chart rect {
+  fill: steelblue;
+}
+
+svg.text {
+  fill: white;
+  font: 10px sans-serif;
+  text-anchor: middle;
+}    
+    
+}
+
+</style>
+    
+</head>
+    
+<div class="topnav">
+  <a href="Home.html">Home</a>
+  <a  href="recalls-years.html">Recalls By Year</a>
+  <a  href="recalls-producttype.html">Recalls By Product Type</a>
+  <a  class="active" href="recalls-usmap.html">Recalls By Recalling Firms</a>
+  <a  href="recalls-status.html">Ongoing Recalls by Prouect Type</a>
+</div>
+<body>
+    
+
+<h2 align="center">Recalls Analysis by Recalling Firm's Location</h2> 
+
+<div class="row">
+  <div class="col-md-5" id="area1"></div>
+ <div class="col-md-5" id="area2" aligh="left">
+    <div class="intro">
+     <b>&middot; Recalling firm</b> means the firm that initiates a recall or, in the case of the Food and Drug Administration-requested recall, the firm that has primary responsibility for the manufacture and marketing of the product to be recalled.
+     </div>
+     <br>
+     The data is between 2012 and 2017 and about the Food and Drug recalls. There is the recall analysis by recalling firm's location. The graph represents the number of recalling firm in U.S. state. The U.S. map indicates that California, Florida, and Illinois have the high number of recalling firms.   
+  </div>
+</div>    
+    
+<script type="text/javascript">
+		
+//Width and height of map
+var width = 1100;
+var height = 450;
+
+var lowColor = '#f9f9f9'
+var highColor = '#bc2a66'
+
+// D3 Projection
+var projection = d3.geoAlbersUsa()
+  .translate([width / 2, height / 2]) // translate to center of screen
+  .scale([1000]); // scale things down so see entire US
+
+// Define path generator
+var path = d3.geoPath() // path generator that will convert GeoJSON to SVG paths
+  .projection(projection); // tell path generator to use albersUsa projection
+
+//Create SVG element and append map to the SVG
+var svg = d3.select("#area1")
+  .append("svg")
+  .attr("width", width)
+  .attr("height", height);
+
+// Load in my states data!
+d3.csv("recalls-usstates.csv", function(data) {
+	var dataArray = [];
+	for (var d = 0; d < data.length; d++) {
+		dataArray.push(parseFloat(data[d].value))
+	}
+	var minVal = d3.min(dataArray)
+	var maxVal = d3.max(dataArray)
+	var ramp = d3.scaleLinear().domain([minVal,maxVal]).range([lowColor,highColor])
+	
+  // Load GeoJSON data and merge with states data
+  d3.json("us-states.json", function(json) {
+
+    // Loop through each state data value in the .csv file
+    for (var i = 0; i < data.length; i++) {
+
+      // Grab State Name
+      var dataState = data[i].state;
+
+      // Grab data value 
+      var dataValue = data[i].value;
+
+      // Find the corresponding state inside the GeoJSON
+      for (var j = 0; j < json.features.length; j++) {
+        var jsonState = json.features[j].properties.name;
+
+        if (dataState == jsonState) {
+
+          // Copy the data value into the JSON
+          json.features[j].properties.value = dataValue;
+
+          // Stop looking through the JSON
+          break;
+        }
+      }
+    }
+
+    // Bind the data to the SVG and create one path per GeoJSON feature
+    svg.selectAll("path")
+      .data(json.features)
+      .enter()
+      .append("path")
+      .attr("d", path)
+      .style("stroke", "#fff")
+      .style("stroke-width", "1")
+      .style("fill", function(d) { return ramp(d.properties.value) });
+    
+		// add a legend
+		var w = 140, h = 450;
+
+		var key = d3.select("body")
+			.append("svg")
+			.attr("width", w)
+			.attr("height", h)
+			.attr("class", "legend");
+
+		var legend = key.append("defs")
+			.append("svg:linearGradient")
+			.attr("id", "gradient")
+			.attr("x1", "100%")
+			.attr("y1", "0%")
+			.attr("x2", "100%")
+			.attr("y2", "100%")
+			.attr("spreadMethod", "pad");
+
+		legend.append("stop")
+			.attr("offset", "0%")
+			.attr("stop-color", highColor)
+			.attr("stop-opacity", 1);
+			
+		legend.append("stop")
+			.attr("offset", "100%")
+			.attr("stop-color", lowColor)
+			.attr("stop-opacity", 1);
+
+		key.append("rect")
+            .attr("y", 100)
+			.attr("width", w - 100)
+			.attr("height", h)
+			.style("fill", "url(#gradient)")
+			.attr("transform", "translate(41,10)");
+
+		var y = d3.scaleLinear()
+			.range([h, 100])
+			.domain([minVal, maxVal]);
+
+		var yAxis = d3.axisRight(y);
+
+		key.append("g")
+			.attr("class", "y axis")
+			.attr("transform", "translate(81,10)")
+			.call(yAxis)
+  });
+});
+</script>
+</body>
+</html>

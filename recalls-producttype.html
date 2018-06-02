@@ -1,0 +1,71 @@
+<html>
+<meta charset="utf-8">
+<link href="menu.css" rel="stylesheet">
+
+<style>
+
+.bar {
+  fill: steelblue;
+}
+
+.bar:hover {
+  fill: brown;
+}
+
+.axis--x path {
+  display: none;
+}
+   
+.chart rect {
+  fill: steelblue;
+}
+
+svg.text {
+  fill: white;
+  font: 10px sans-serif;
+  text-anchor: middle;
+}    
+    
+}
+
+</style>
+<body>
+        
+<div class="topnav">
+   <a href="Home.html">Home</a>
+  <a  href="recalls-years.html">Recalls By Year</a>
+  <a  class="active" href="recalls-producttype.html">Recalls By Product Type</a>
+  <a  href="recalls-usmap.html">Recalls By Recalling Firms</a>
+  <a  href="recalls-status.html">Ongoing Recalls by Prouect Type</a>
+</div>
+    
+<h2 align="center">Recalls Analysis by Proudct Type</h2> 
+    
+<div id="chartContainer">
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <script src="http://dimplejs.org/dist/dimple.v2.3.0.min.js"></script>
+  <script type="text/javascript">
+    var svg = dimple.newSvg("#chartContainer", 800, 450);
+    d3.csv("recalls-YearProduct.csv", function (data) {
+      var myChart = new dimple.chart(svg, data);
+      myChart.setBounds(60, 45, 700, 350)
+      myChart.addCategoryAxis("x", ["Year"]);
+      myChart.addMeasureAxis("y", ["Total Recalls"]);
+      myChart.addSeries(["Product Type"], dimple.plot.bar);
+      myChart.addLegend(200, 10, 380, 20, "right");
+      myChart.draw();
+        
+        
+    });
+  </script>
+</div>
+    <div class="intro"> <b>&middot; Recalls Product Type </b> <br>
+        &nbsp; Biologics, Devices, Drugs, Food/Cosmetics, and Veterinary
+    </div>
+    <br>
+    <div> 
+     The graph is about the recalls analysis by year and product type. It shows that "Food/Cosmetics" and "Devices" have the high number of recalls during the last five years. When the number of recalls increased, "Food/Cosmetics" and "Devices" are also increased more than the others. And the interesting is the change in the number of recalls in Biologics. In 2013, there was the highest number of recalls in Biologics. Since then, Biologics's recalls decreased. 
+        
+    </div>
+    </body>
+</html>

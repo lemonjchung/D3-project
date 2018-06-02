@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+<link href="menu.css" rel="stylesheet">
+    
+</head>
+
+<style> /* set the CSS */
+h1,h2,h3,h4,h5,h6 {
+     font-family: Monaco, Menlo, Consolas, "Courier New", monospace;
+     letter-spacing: 1px;
+}
+div {
+     font: 13px monospace;
+}   
+  
+div.intro {
+     font: 12px "Courier New";
+}   
+  
+    
+body {  font-family: Monaco, Menlo, Consolas, "Courier New", monospace;
+        font: 13px Arial;}
+
+path { 
+	stroke: steelblue;
+	stroke-width: 2;
+	fill: none;
+}
+
+.axis path,
+.axis line {
+	fill: none;
+	stroke: grey;
+	stroke-width: 1;
+	shape-rendering: crispEdges;
+}
+
+    
+.bar {
+  fill: steelblue;
+}
+
+.bar:hover {
+  fill: brown;
+}
+
+.axis--x path {
+  display: none;
+}
+   
+.chart rect {
+  fill: steelblue;
+}
+
+svg.text {
+  fill: white;
+  font: 13px sans-serif;
+  text-anchor: middle;
+}  
+    
+div.a{
+    width: 5%; 
+    align-content: center;
+}
+div.c {
+    width: 95%; 
+    align-content: left;
+}
+    
+</style>
+<body>
+
+<div class="topnav">
+  <a class="active" href="#home">Home</a>
+  <a  href="recalls-years.html">Recalls By Year</a>
+  <a  href="recalls-producttype.html">Recalls By Product Type</a>
+  <a  href="recalls-usmap.html">Recalls By Recalling Firms</a>
+  <a  href="recalls-status.html">Ongoing Recalls by Prouect Type</a>
+</div>
+
+<h1 align="center">U.S. Food and Drug Recalls Analysis </h1>
+<h3 align="center">Background of the dataset</h3>
+    <div class="c" >&nbsp; 
+        <p>&nbsp; The Food and Drugs recalls are the most effective means of protecting public health when a widely consumed food product is either defective or potentially harmful. The Recalls data is from the U.S. Food and Drug Administrator(FDA) website and the data collection is from 2012 to 2017. There are five different types of recalls analysis in the report.
+            <br> &nbsp;&nbsp; <b>&diams; Recalls Data Analysis </b>
+            <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &middot; Recalls Analysis by Year
+            <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &middot; Recalls Analysis by Product Type
+            <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &middot; Recalls Analysis by Recalling Firm's Location
+            <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &middot; Ongoing Recalls Analysis by Product Type
+            
+        </p>
+        <p>&nbsp; Recalls are actions taken by a firm to remove a product from the market. Recalls may be conducted on a firm's own initiative, by FDA request, or by FDA order under statutory authority. See Definitions of Market Withdrawals and Class I, II, and III recalls. All recalls analysis can be found in the top menu.
+        </p>
+    </div>
+    <div class="c">&nbsp;</div>
+
+<h3 align="center"> Recalls Analysis by Classification </h3>
+
+<div class="row" >
+  <div class="col-md-5" id="area1" ></div>
+ <div class="col-md-5" id="area2" aligh="left" >
+      <br>
+     <h6><b>&lt;Classifications Definition&gt;</b></h6>
+     
+     <div class="intro">
+     <b>&middot; Class I</b>: Dangerous or defective products that predictably could cause serious health problems or death. Examples include: food found to contain botulinum toxin, food with undeclared allergens, a label mix-up on a lifesaving drug, or a defective artificial heart valve.
+     <br>
+     <b>&middot; Class II</b>: Products that might cause a temporary health problem, or pose only a slight threat of a serious nature. Example: a drug that is under-strength but that is not used to treat life-threatening situations.
+     <br>
+     <b>&middot; Class III</b>: Products that are unlikely to cause any adverse health reaction, but that violate FDA labeling or manufacturing laws. Examples include: a minor container defect and lack of English labeling in a retail food.
+     </div>
+     <br><br>
+        The graph indicates that "Class II" and "Class III" are increased slowly. However, "Class I" is highly increased the number of recalls during last five years. According to the definition, "Class I" will cause serious health issue so we need to investigate why only "Class I" was highly increased the number of recalls and what is the way to prevent to increase the total recalls of "Class I". 
+     
+  </div>
+</div>
+
+<!-- load the JavaScript libraries 
+<script src="http://d3js.org/d3.v3.min.js"></script> -->
+<script src="http://code.jquery.com/jquery.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+
+<!-- load the d3.js library -->    
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+<script>
+
+// Set the dimensions of the canvas / graph
+var margin = {top: 30, right: 20, bottom: 70, left: 50},
+    width = 500 - margin.left - margin.right,
+    height = 350 - margin.top - margin.bottom;
+
+// Parse the date / time
+var parseDate = d3.timeParse("%Y%m%d");
+
+// Set the ranges
+var x = d3.scaleTime().range([0, width]);  
+var y = d3.scaleLinear().range([height, 0]);
+
+// Define the line
+var priceline = d3.line()	
+    .x(function(d) { return x(d.date); })
+    .y(function(d) { return y(d.price); });
+    
+// Adds the svg canvas
+var svg = d3.select("#area1")
+    .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+        .attr("transform", 
+              "translate(" + margin.left + "," + margin.top + ")");
+
+// Get the data
+d3.csv("recalls-cls.csv", function(error, data) {
+    data.forEach(function(d) {
+		d.date = parseDate(d.date);
+		d.price = +d.price;
+    });
+
+    // Scale the range of the data
+    x.domain(d3.extent(data, function(d) { return d.date; }));
+    y.domain([0, d3.max(data, function(d) { return d.price; })]);
+
+    // Nest the entries by symbol
+    var dataNest = d3.nest()
+        .key(function(d) {return d.symbol;})
+        .entries(data);
+
+    // set the colour scale
+    var color = d3.scaleOrdinal(d3.schemeCategory10);
+
+    legendSpace = width/dataNest.length; // spacing for the legend
+
+    // Loop through each symbol / key
+    dataNest.forEach(function(d,i) { 
+
+        svg.append("path")
+            .attr("class", "line")
+            .style("stroke", function() { // Add the colours dynamically
+                return d.color = color(d.key); })
+            .attr("id", 'tag'+d.key.replace(/\s+/g, '')) // assign an ID
+            .attr("d", priceline(d.values));
+
+        // Add the Legend
+        svg.append("text")
+            .attr("x", (legendSpace/2)+i*legendSpace)  // space legend
+            .attr("y", height + (margin.bottom/2)+ 5)
+            .attr("class", "legend")    // style the legend
+            .style("fill", function() { // Add the colours dynamically
+                return d.color = color(d.key); })
+            .on("click", function(){
+                // Determine if current line is visible 
+                var active   = d.active ? false : true,
+                newOpacity = active ? 0 : 1; 
+                // Hide or show the elements based on the ID
+                d3.select("#tag"+d.key.replace(/\s+/g, ''))
+                    .transition().duration(100) 
+                    .style("opacity", newOpacity); 
+                // Update whether or not the elements are active
+                d.active = active;
+                })  
+            .text(d.key); 
+
+    });
+
+  // Add the X Axis
+  svg.append("g")
+      .attr("class", "axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+
+  // Add the Y Axis
+  svg.append("g")
+      .attr("class", "axis")
+      .call(d3.axisLeft(y));
+
+});
+
+//https://bl.ocks.org/d3noob/08af723fe615c08f9536f656b55755b4
+    
+</script>
+    
+</body>

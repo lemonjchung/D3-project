@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<link href="menu.css" rel="stylesheet">
+
+<style>
+
+.bar {
+  fill: steelblue;
+}
+
+.bar:hover {
+  fill: brown;
+}
+
+.axis--x path {
+  display: none;
+}
+   
+.chart rect {
+  fill: steelblue;
+}
+
+svg.text {
+  fill: white;
+  font: 10px sans-serif;
+  text-anchor: middle;
+}    
+    
+}
+
+</style>
+<body>
+    
+<div class="topnav">
+  <a href="Home.html">Home</a>
+  <a  class="active" href="recalls-years.html">Recalls By Year</a>
+  <a  href="recalls-producttype.html">Recalls By Product Type</a>
+  <a  href="recalls-usmap.html">Recalls By Recalling Firms</a>
+  <a  href="recalls-status.html">Ongoing Recalls by Prouect Type</a>
+</div>
+    
+<h2 align="center">Recalls Analysis by the Fiscal Year</h2> 
+<div>
+    <div >
+<svg width="800" height="400"></svg>
+    </div>
+    <div class="intro">
+        <b>&middot; The fiscal year</b> is the accounting period for the federal government which begins on October 1 and ends on September 30. The fiscal year is designated by the calendar year in which it ends: for example, the fiscal year 2017 begins on October 1, 2016, and ends on September 30, 2017.
+    </div>
+    <br>
+    <div>
+        There is the recalls analysis by the fiscal year. The graph represents the total recalls by the fiscal year. In general, the number of recalls is trending upwards
+        from 2012 to 2017. However, 2014 and 2016 decreased a little bit. It means we need to check this year(2018). Also, the 2015 is the highest number of recalls. It also needs to investigate the outside effects.
+    </div>
+</div>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+
+var svg = d3.select("svg"),
+    margin = {top: 20, right: 20, bottom: 30, left: 40},
+    width = +svg.attr("width") - margin.left - margin.right,
+    height = +svg.attr("height") - margin.top - margin.bottom;
+
+
+//d3.scale.ordinal().rangeRoundBands([0, width], .1) => d3.scaleBand().rangeRound([0, width])
+    
+var x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
+    y = d3.scaleLinear().rangeRound([height, 0]);
+
+    
+var g = svg.append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+d3.csv("recalls-year.csv", function(d) {
+  d.recalls = +d.recalls;
+  return d;
+}, function(error, data) {
+  if (error) throw error;
+
+  x.domain(data.map(function(d) { return d.year; }));
+  y.domain([0, d3.max(data, function(d) { return d.recalls; })]);
+
+  g.append("g")
+      .attr("class", "axis axis--x")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+
+  g.append("g")
+      .attr("class", "axis axis--y")
+      .call(d3.axisLeft(y))
+    //  .call(d3.axisLeft(y).ticks(10, "%"))
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", "0.71em")
+      .attr("text-anchor", "end")
+      .text("Recalls");
+
+    
+        var bars = svg.selectAll(".bar")
+            .data(data)
+            .enter()
+            
+        
+bars.append("rect")
+      .attr("class", "bar")
+      .attr("x", function(d) { return x(d.year)+40; })
+      .attr("y", function(d) { return y(d.recalls); })
+      .attr("width", x.bandwidth())
+      .attr("height", function(d) { return height - y(d.recalls) +20; })
+    ;
+    
+  bars.append("text")
+      .attr("x", function(d) { return x(d.year)+80; })
+      .attr("y", function(d) { return y(d.recalls) + 3; })
+      .attr("dy", ".75em")
+      .text(function(d) { return d.recalls; })
+    ;
+
+    
+});
+    
+
+    
+</script>
+    
+    </body>    
+</html>
